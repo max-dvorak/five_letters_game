@@ -1,6 +1,6 @@
+import csv
 from random import choice
 from datetime import datetime, time
-import csv
 
 credit = '--- v.1.1. Apr 2024. M.Dvorak ---'
 
@@ -292,6 +292,7 @@ def the_game(the_word: str) -> bool:
             print(f'{HOST_NAME}: К сожалению, попыток не осталось. :(')
             print(' ' * 14 + f'А загадано было слово "{the_word}".')
             return False
+    return False
 
 
 # Второй вложенный контур: работа с конкретным ходом
