@@ -1,6 +1,6 @@
 import csv
-from random import choice
 from datetime import datetime, time
+from random import choice
 
 credit = '--- v.1.1. Apr 2024. M.Dvorak ---'
 
@@ -263,7 +263,7 @@ def the_game(the_word: str) -> bool:
                 print(
                     f'{INDENT}{gamer_name}, внимательнее! Осталось 2 попытки!')
         else:
-            print(f'{HOST_NAME}: К сожалению, попыток не осталось. :(')
+            print(f'\n{HOST_NAME}: К сожалению, попыток не осталось. :(')
             print(f'{INDENT}А загадано было слово "{the_word}".')
             return False
 
