@@ -16,36 +16,13 @@ BOARD_INDEXES = {
     '4': 13
 }
 
-# users = {
-#     'Макс': {
-#         'Всего сыграно': 0,
-#         'Отгадано слов': 0,
-#         'Отгаданные слова': []
-#     }
-# }
-
 
 def login() -> str:
     entered_name = input('Привет! Пожалуйста, введи свое имя:\n')
-    # if entered_name in users:
-    #     welcome_back = (
-    #         'С возвращением в игру! У тебя на счету:\n'
-    #         f'Игр: {0} | Побед: {0}\n'
-    #         'Слова, которые были тобой угаданы:\n'
-    #         f'{[]}\n'
-    #     )
-    #     print(welcome_back)
-    # else:
-    #     print('Добро пожаловать в игру! Сохраняем данные пользователя.\n')
-    #     users[entered_name] = {
-    #         'Всего сыграно': 0,
-    #         'Отгадано слов': 0,
-    #         'Отгаданные слова': []
-    #     }
-    # print('А теперь самое время разбудить Якубовича 2.0!\n')
     return entered_name
 
 
+# Можно заменить на строку, чтобы не вводить при каждом запуске.
 gamer_name = login()
 
 
@@ -85,6 +62,8 @@ def start():
     games_counter = 0
     wins_counter = 0
     current_words = []
+    # Получение списка игровых слов для текущей игры.
+    # Возможно некорректная работа из-за encoding.
     with open('5_char_words.csv', newline='', encoding='cp1251') as file:
         for row in csv.reader(file):
             current_words.append(row[0].lower())
@@ -124,7 +103,6 @@ def start():
         else:
             stop_playing = True
 
-    save_results()
     superprize = choice(superprizes)
 
     print(f'{HOST_NAME}: Тогда спасибо за игру!')
@@ -143,6 +121,7 @@ def start():
         words_str = ''
         for word in guessed_words:
             words_str += word
+            # Разделяем слова запятыми, если только оно не последнее в списке.
             if len(guessed_words) > guessed_words.index(word) + 1:
                 words_str += ', '
         print(INDENT + words_str)
@@ -163,11 +142,7 @@ def start():
               {credit}''')
 
 
-def save_results():
-    pass
-
-
-# Текст приветствия для нового игрока.
+# Приветствие и инструкции для нового игрока.
 def hello_new_player():
     print(f'''{HOST_NAME}: Что ж, пока рекламная пауза, разберёмся, что к чему!
               "{GAME_TITLE}" - это классическая игра "5 букв",
@@ -241,8 +216,8 @@ def hello_new_player():
         print(INDENT + '[    Э Т О    ]')
         print(INDENT + '[П О Б Е Д А !]')
         print('')
-        print(f'''{HOST_NAME}: Ура! Мы это сделали!
-              А теперь, как говорил Шерлок, - в игру, в игру!''')
+        print(f'{HOST_NAME}: Ура! Мы это сделали!\n'
+              f'{INDENT}А теперь, как говорил Шерлок, - в игру, в игру!')
 
 
 # Первый вложенный контур: конкретная игра.
@@ -254,12 +229,11 @@ def the_game(the_word: str) -> bool:
         'Нет, это неправильно, сорри.',
         'Ну же, я прямо чувствую, как победа приближается!',
         f'Уфф, дамы и господа, поддержим {gamer_name} аплодисментами!',
-        '* Хрустит яблоком из кибермузея "Поле Чудес" *',
+        '* Хрустит яблоком из кибермузея "Поле Чудес" *'
     )
 
     tries_count = 0
     current_board = new_empty_board()
-    # print(f'ЗАГАДАННОЕ СЛОВО: {the_word}')
     print(f'\n{HOST_NAME}: Какое слово назовешь первым?')
     while tries_count <= 6:
         tries_count += 1
@@ -281,18 +255,17 @@ def the_game(the_word: str) -> bool:
             )
             print('')
             for row in current_board:
-                print(' ' * 14 + row)
+                print(INDENT + row)
             return True
         if tries_count < 6:
-            print(' ' * 14 + f'Осталось попыток: {MAX_TRIES - tries_count}')
+            print(f'{INDENT}Осталось попыток: {MAX_TRIES - tries_count}')
             if tries_count == 4:
                 print(
-                    '{INDENT}{gamer_name}, внимательнее! Осталось 2 попытки!')
+                    f'{INDENT}{gamer_name}, внимательнее! Осталось 2 попытки!')
         else:
             print(f'{HOST_NAME}: К сожалению, попыток не осталось. :(')
-            print(' ' * 14 + f'А загадано было слово "{the_word}".')
+            print(f'{INDENT}А загадано было слово "{the_word}".')
             return False
-    return False
 
 
 # Второй вложенный контур: работа с конкретным ходом
@@ -317,21 +290,23 @@ def your_move(
     # 2-й проверяет наличие букв в других позициях.
     # Также на втором прогоне если букв в слове нет, они буквотилизируются.
     for char in user_list:  # 1-й прогон
-        user_pos = user_list.index(char)  # Индекс буквы в слове пользователя
-        secret_pos = user_pos  # Индекс эквивалентной буквы в загаданном слове
-        board_pos = BOARD_INDEXES.get(str(user_pos))  # Место буквы на доске
+        user_pos = user_list.index(char)  # Индекс буквы в слове пользователя.
+        secret_pos = user_pos  # Индекс эквивалентной буквы в загаданном слове.
+        board_pos = BOARD_INDEXES.get(str(user_pos))  # Место буквы на доске.
 
         if char in secret_list:
             if secret_list[secret_pos] == user_list[user_pos]:
                 current_row = upper_case_add(current_row, char, board_pos)
+                # Убираем букву из загаданного слова,
+                # чтобы не индексировалась повторно.
                 secret_list[secret_pos] = ' '
 
         board[try_number + 1] = current_row
-        # чтобы индекс следующей такой буквы был ОК
+        # Чтобы индекс следующей такой буквы был ОК.
         user_list[user_list.index(char)] = char.upper()
     # 1-й прогон закончен
 
-    # Возвращаем список из слова в исходное состояние после прогона
+    # Возвращаем список из слова в исходное состояние после прогона.
     for char in user_list:
         user_list[user_list.index(char)] = char.lower()
 
@@ -369,8 +344,6 @@ def your_move(
                 else:
                     # Если строка начинается не с '[' - это "БУКВОТИЛИЗАТОР:"
                     break
-            # print('Буквы в утилизаторе:')
-            # print(utilized_chars)
             # Если в получившемся множестве этой буквы нет - добавляем.
             if char not in utilized_chars:
                 current_utilizer = utilize(current_utilizer, char)
@@ -388,7 +361,7 @@ def your_move(
 
     print('')
     for row in board:
-        print(' ' * 14 + row)
+        print(INDENT + row)
     return board
 
 
@@ -475,17 +448,18 @@ def enter_the_word() -> str:
                 print(' ' * 2 + row)
             return the_word
         else:
-            # print('Есть такое слово')
             return the_word
 
 
 # Определятор времени суток со здоровалкой.
 def user_time_hello() -> str:
     current_hour = datetime.time(datetime.now())
+
     six_morning = time(hour=6, minute=0, second=0)
     noon = time(hour=12, minute=0, second=0)
     six_evening = time(hour=18, minute=0, second=0)
     eleven_evening = time(hour=23, minute=0, second=0)
+
     if current_hour < time(hour=6, minute=0, second=0):
         return 'Доброй ночи'
     elif six_morning <= current_hour < noon:
@@ -513,7 +487,7 @@ def new_empty_board() -> list:
     new_board.append('БУКВОТИЛИЗАТОР:')
     new_board.append('[' + '_' * 13 + ']')
     for row in new_board:
-        print(' ' * 14 + row)
+        print(INDENT + row)
     return new_board
 
 
@@ -563,11 +537,9 @@ def winner_board(winner_board: list, the_word: str, the_try: int) -> list:
         winner_row = upper_case_add(winner_row, char, char_board_index)
         char_board_index += 3
     winner_row += ' < < <'
-    # print(winner_row)
     winner_board[the_try + 1] = winner_row
     winner_board.extend(winner_addition)
-    # for row in winner_board:
-    #     print(row)
+
     return winner_board
 
 
